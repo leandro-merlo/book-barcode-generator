@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Código de Barras Editorial (Padrão EAN-13 / ISBN)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-start p-4 md:p-8 gap-8">
+
+    <!-- 1. TOPO: VITRINE DE OBRAS EM DESTAQUE (PRIMEIRA COISA QUE O USUÁRIO VÊ) -->
+    <div class="w-full max-w-2xl bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 p-6">
+        <div class="mb-4 pb-3 border-b border-slate-800 flex items-center justify-between">
+            <div>
+                <h2 class="text-base font-bold text-white tracking-tight">Vitrine de Obra - LEANDRO MANZANO MERLO</h2>
+                <p class="text-xs text-slate-400">Clique para injetar o ISBN automaticamente</p>
+            </div>
+            <span class="text-xs font-mono text-blue-400 bg-blue-950/50 border border-blue-900 px-2 py-1 rounded">Multiverso Ativo</span>
+        </div>
+
+        <div id="vitrineContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            
+<!--             
+            <button data-isbn="978-65-02-01412-7" class="btn-injetar text-left bg-slate-950 border border-slate-800 hover:border-blue-500/50 rounded-xl p-3 flex flex-col justify-between transition-all cursor-pointer group">
+                <div>
+                    <span class="text-[10px] font-semibold text-blue-400 uppercase tracking-wider">Cyberpunk</span>
+                    <h3 class="text-xs font-bold text-white mt-1 group-hover:text-blue-300 transition-colors">O Ás de Espadas</h3>
+                </div>
+                <span class="text-[10px] font-mono text-slate-500 mt-3 pt-2 border-t border-slate-900">978-65-02-01412-7</span>
+            </button>
+
+            <button data-isbn="978-65-00-12345-6" class="btn-injetar text-left bg-slate-950 border border-slate-800 hover:border-blue-500/50 rounded-xl p-3 flex flex-col justify-between transition-all cursor-pointer group">
+                <div>
+                    <span class="text-[10px] font-semibold text-blue-400 uppercase tracking-wider">Sci-Fi / Rock</span>
+                    <h3 class="text-xs font-bold text-white mt-1 group-hover:text-blue-300 transition-colors">Troll do Multiverso</h3>
+                </div>
+                <span class="text-[10px] font-mono text-slate-500 mt-3 pt-2 border-t border-slate-900">978-65-00-12345-6</span>
+            </button>
+
+            <button data-isbn="978-65-00-78910-1" class="btn-injetar text-left bg-slate-950 border border-slate-800 hover:border-blue-500/50 rounded-xl p-3 flex flex-col justify-between transition-all cursor-pointer group">
+                <div>
+                    <span class="text-[10px] font-semibold text-blue-400 uppercase tracking-wider">Suspense / Noir</span>
+                    <h3 class="text-xs font-bold text-white mt-1 group-hover:text-blue-300 transition-colors">O Rastro Cego</h3>
+                </div>
+                <span class="text-[10px] font-mono text-slate-500 mt-3 pt-2 border-t border-slate-900">978-65-00-78910-1</span>
+            </button>
+ -->
+        </div>
+    </div>
+
+    <!-- 2. ABAIXO: O GERADOR DE ETIQUETAS (JÁ ALIMENTADO PELA ESCOLHA) -->
+    <div class="w-full max-w-lg bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 p-6">
+        
+        <div class="mb-6">
+            <h1 class="text-xl font-bold tracking-tight text-white">Gerador de Código de Barras</h1>
+            <p class="text-sm text-slate-400 mt-1">Gerador de Código de Barras Editorial (Padrão EAN-13 / ISBN)</p>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label for="isbnInput" class="block text-sm font-semibold text-slate-300 mb-1">Insira o ISBN</label>
+                <input 
+                    type="text" 
+                    id="isbnInput" 
+                    value="978-65-02-01412-7"
+                    placeholder="Ex: 978-65-02-01412-7" 
+                    class="w-full px-4 py-3 rounded-lg border border-slate-700 bg-slate-950 font-mono tracking-wider text-lg text-center text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                <p id="errorMessage" class="hidden text-xs font-medium text-rose-400 mt-1.5">⚠️ Erro de validação.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 bg-slate-950 p-3 rounded-lg border border-slate-800">
+                <div>
+                    <label for="widthInput" class="block text-xs font-semibold text-slate-400 mb-1 flex justify-between">
+                        <span>Largura da Etiqueta</span>
+                        <span id="widthVal" class="text-blue-400 font-mono">480px</span>
+                    </label>
+                    <input type="range" id="widthInput" min="350" max="700" value="480" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                </div>
+                <div>
+                    <label for="heightInput" class="block text-xs font-semibold text-slate-400 mb-1 flex justify-between">
+                        <span>Altura da Etiqueta</span>
+                        <span id="heightVal" class="text-blue-400 font-mono">375px</span>
+                    </label>
+                    <input type="range" id="heightInput" min="230" max="600" value="375" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-300 mb-1">Logotipo Personalizado (Opcional)</label>
+                <div class="flex items-center gap-3">
+                    <label for="logoInput" class="flex flex-1 items-center justify-center gap-2 px-4 py-2 rounded-lg border border-dashed border-slate-600 bg-slate-950 text-sm font-medium text-slate-400 hover:text-white hover:border-slate-400 cursor-pointer transition-colors">
+                        <span>📁 Escolher imagem (PNG/JPG)</span>
+                        <input type="file" id="logoInput" accept="image/*" class="hidden">
+                    </label>
+                    <button id="btnRemoveLogo" class="hidden px-3 py-2 bg-rose-950 border border-rose-800 text-rose-300 hover:bg-rose-900 text-sm font-medium rounded-lg transition-colors">
+                        Remover
+                    </button>
+                </div>
+            </div>
+
+            <button id="btnGerar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg cursor-pointer text-sm tracking-wide transition-colors">
+                GERAR ETIQUETA REAL CBL
+            </button>
+        </div>
+
+        <div id="labelPreviewContainer" class="hidden mt-8 pt-6 border-t border-slate-800 flex flex-col items-center justify-center relative">
+            
+            <div id="cblLabel" class="bg-white text-black p-3 rounded-[24px] border-2 border-black shadow-inner flex flex-col items-center select-none relative box-border font-sans overflow-hidden">
+                
+                <div id="cblTextTop" class="text-[32px] font-bold tracking-normal mt-1 text-center w-full whitespace-nowrap overflow-hidden select-none" style="font-family: Arial, sans-serif;">
+                    ISBN:
+                </div>
+
+                <div id="cblBodyCentral" class="w-full flex-1 min-h-0 mt-2 px-1 relative">
+                    <svg id="customBarcodeSvg" class="w-full h-full"></svg>
+                </div>
+
+                <div id="logoContainer" class="hidden absolute left-4 top-1/2 -translate-y-1/2 w-[45px] h-[55%] flex items-center justify-center overflow-hidden z-20">
+                    <img id="customLogoPreview" class="max-w-[155px] max-h-[45px] object-contain -rotate-90" src="" alt="Logo">
+                </div>
+
+            </div>
+
+            <div class="mt-6 flex gap-3 w-full max-w-[480px]">
+                <button id="btnDownloadPNG" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg cursor-pointer text-sm transition-colors text-center">
+                    📥 Baixar PNG
+                </button>
+                <button id="btnDownloadSVG" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg cursor-pointer text-sm transition-colors text-center">
+                    📥 Baixar SVG
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const EAN_MAP = {
+            A: ["0001101", "0011001", "0010011", "0111101", "0100011", "0110001", "0101111", "0111011", "0110111", "0001011"],
+            B: ["0100111", "0110011", "0011011", "0100001", "0011101", "0111001", "0000101", "0010001", "0001001", "0010111"],
+            C: ["1110010", "1100110", "1101100", "1000010", "1011100", "1001110", "1010000", "1000100", "1001000", "1110100"]
+        };
+        const PARITY_MAP = ["AAAAAA", "AABABB", "AABBAB", "AABBBA", "ABAABB", "ABBAAB", "ABBBAA", "ABABAB", "ABABBA", "ABBABA"];
+
+        const input = document.getElementById("isbnInput");
+        const logoInput = document.getElementById("logoInput");
+        const btnRemoveLogo = document.getElementById("btnRemoveLogo");
+        const btnGerar = document.getElementById("btnGerar");
+        const errorMsg = document.getElementById("errorMessage");
+        const labelContainer = document.getElementById("labelPreviewContainer");
+        const textTop = document.getElementById("cblTextTop");
+        const svg = document.getElementById("customBarcodeSvg");
+        const bdyCentral = document.getElementById("cblBodyCentral");
+        const logoContainer = document.getElementById("logoContainer");
+        const customLogoPreview = document.getElementById("customLogoPreview");
+        const labelDiv = document.getElementById("cblLabel");
+        const widthInput = document.getElementById("widthInput");
+        const heightInput = document.getElementById("heightInput");
+        const widthVal = document.getElementById("widthVal");
+        const heightVal = document.getElementById("heightVal");
+        const btnDownloadPNG = document.getElementById("btnDownloadPNG");
+        const btnDownloadSVG = document.getElementById("btnDownloadSVG");
+
+        const OBRAS_MULTIVERSO = [
+            {
+                titulo: "O Ás de Espadas - Entre o Ás e o Valete",
+                categoria: "Cyberpunk Noir - Alta Octanagem",
+                isbn: "9786502014127", // Aceita com ou sem traço
+                capa: "img/capa-mini.png", // Substitua pelo link/caminho da capa
+                url: "https://loja.uiclap.com/titulo/ua160962" // Substitua pelo link da obra
+            },
+            {
+                titulo: "Troll do Multiverso - Gnose, Mijo e Rock'n'Roll",
+                categoria: "Sci-Fi - Cyber-caiçara - Weird Fiction",
+                isbn: "9786500123456",
+                capa: "img/troll.png",
+                url: "https://loja.uiclap.com/titulo/ua199565" // Substitua pelo link da obra
+            },
+            // Amanhã, basta colar o próximo livro aqui:
+            // { titulo: "Livro 4", categoria: "Terror", isbn: "978...", capa: "..." }
+        ];
+        let logoBase64 = null;
+
+        function renderizarVitrine() {
+            const container = document.getElementById("vitrineContainer");
+            if (!container) return;
+
+            container.innerHTML = OBRAS_MULTIVERSO.map(obra => {
+                // Formata o ISBN para exibição visual bonitinha (opcional)
+                const isbnFormatado = obra.isbn.length === 13 
+                    ? `${obra.isbn.substring(0,3)}-${obra.isbn.substring(3,5)}-${obra.isbn.substring(5,7)}-${obra.isbn.substring(7,12)}-${obra.isbn.substring(12,13)}`
+                    : obra.isbn;
+
+                return `
+                    <button data-url="${obra.url}" data-isbn="${obra.isbn}" class="btn-injetar text-left bg-slate-950 border border-slate-800 hover:border-blue-500/50 rounded-xl p-3 flex flex-col justify-between transition-all cursor-pointer group">
+                        <div>
+                            <span class="text-[10px] font-semibold text-blue-400 uppercase tracking-wider">${obra.categoria}</span>
+                            <h3 class="text-xs font-bold text-white mt-1 group-hover:text-blue-300 transition-colors">${obra.titulo}</h3>
+                            <img src="${obra.capa}" style="height: 430px;" alt="Capa de ${obra.titulo}" class="mt-2 w-full h-auto rounded-md object-cover border border-slate-700">
+                        </div>
+                        <span class="text-[10px] font-mono text-slate-500 mt-3 pt-2 border-t border-slate-900">${isbnFormatado}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        widthInput.addEventListener("input", (e) => {
+            widthVal.textContent = `${e.target.value}px`;
+            labelDiv.style.width = `${e.target.value}px`;
+            if(!labelContainer.classList.contains('hidden')) btnGerar.click();
+        });
+
+        heightInput.addEventListener("input", (e) => {
+            heightVal.textContent = `${e.target.value}px`;
+            labelDiv.style.height = `${e.target.value}px`;
+            if(!labelContainer.classList.contains('hidden')) btnGerar.click();
+        });
+
+        logoInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    logoBase64 = event.target.result;
+                    customLogoPreview.src = logoBase64;
+                    btnRemoveLogo.classList.remove("hidden");
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        btnRemoveLogo.addEventListener("click", () => {
+            logoBase64 = null;
+            logoInput.value = "";
+            customLogoPreview.src = "";
+            logoContainer.classList.add("hidden");
+            btnRemoveLogo.classList.add("hidden");
+            bdyCentral.classList.remove("pl-14");
+            if(!labelContainer.classList.contains('hidden')) btnGerar.click();
+        });
+
+        function validarISBN13(isbn) {
+            if (isbn.length !== 13 || !/^\d+$/.test(isbn)) {
+                return false;
+            }
+
+            let soma = 0;
+            for (let i = 0; i < 12; i++) {
+                soma += parseInt(isbn[i]) * (i % 2 === 0 ? 1 : 3);
+            }
+
+            let resto = soma % 10;
+            let digitoVerificadorCalculado = resto === 0 ? 0 : 10 - resto;
+
+            return digitoVerificadorCalculado === parseInt(isbn[12]);
+        }
+
+        input.addEventListener("input", () => {
+            input.classList.remove("border-rose-500", "bg-rose-950/30");
+            errorMsg.classList.add("hidden");
+            errorMsg.style.display = "none";
+        });
+
+        btnGerar.addEventListener("click", () => {
+            const isbn = input.value.replace(/[-\s]/g, '');
+            
+            if (!validarISBN13(isbn)) {
+                errorMsg.textContent = "⚠️ Digite um ISBN válido (Erro no dígito verificador).";
+                errorMsg.classList.remove("hidden");
+                errorMsg.style.display = "block";
+                input.classList.add("border-rose-500", "bg-rose-950/30");
+                labelContainer.classList.add("hidden");
+                return;
+            }
+
+            errorMsg.classList.add("hidden");
+            errorMsg.style.display = "none";
+            input.classList.remove("border-rose-500", "bg-rose-950/30");
+
+            const w = parseInt(widthInput.value);
+            const h = parseInt(heightInput.value);
+            labelDiv.style.width = `${w}px`;
+            labelDiv.style.height = `${h}px`;
+
+            let paddingLeft = 8;
+            if (logoBase64) {
+                logoContainer.classList.remove("hidden");
+                bdyCentral.classList.add("pl-14");
+                paddingLeft = 56;
+            } else {
+                logoContainer.classList.add("hidden");
+                bdyCentral.classList.remove("pl-14");
+            }
+
+            textTop.textContent = `ISBN: ${isbn.substring(0,3)}-${isbn.substring(3,5)}-${isbn.substring(5,7)}-${isbn.substring(7,12)}-${isbn.substring(12,13)}`;
+            const fontSizeTop = h < 300 ? h * 0.08 : 32;
+            textTop.style.fontSize = `${fontSizeTop}px`;
+
+            const svgW = w - paddingLeft - 24;
+            const svgH = h - fontSizeTop - 40;
+            svg.setAttribute("viewBox", `0 0 ${svgW} ${svgH}`);
+
+            let binario = "";
+            binario += "101"; 
+            const primeiroDigito = parseInt(isbn[0]);
+            const paridade = PARITY_MAP[primeiroDigito];
+
+            for (let i = 1; i <= 6; i++) {
+                const num = parseInt(isbn[i]);
+                binario += paridade[i-1] === 'A' ? EAN_MAP.A[num] : EAN_MAP.B[num];
+            }
+            binario += "01010"; 
+            for (let i = 7; i <= 12; i++) {
+                const num = parseInt(isbn[i]);
+                binario += EAN_MAP.C[num];
+            }
+            binario += "101"; 
+
+            const totalModulos = 95;
+            const moduloW = (svgW * 0.88) / totalModulos;
+            const offsetEsquerda = svgW * 0.09;
+            const hriFontSize = Math.max(14, Math.min(svgW * 0.08, svgH * 0.16));
+            const barraGuardaH = svgH - hriFontSize * 0.6;
+            const barraDadosH = barraGuardaH - hriFontSize * 0.7;
+
+            let svgHtml = `<g id="barsGroup">`;
+            for (let i = 0; i < binario.length; i++) {
+                if (binario[i] === "1") {
+                    const ehGuarda = (i < 3) || (i >= 45 && i < 50) || (i >= 92);
+                    const xPos = offsetEsquerda + (i * moduloW);
+                    const altura = ehGuarda ? barraGuardaH : barraDadosH;
+                    svgHtml += `<rect x="${xPos}" y="0" width="${moduloW * 0.9}" height="${altura}" fill="black" />`;
+                }
+            }
+            svgHtml += `</g>`;
+
+            const yPosText = svgH - 2;
+            const xGrupo1 = offsetEsquerda + (3 * moduloW) + (42 * moduloW) / 2;
+            const xGrupo2 = offsetEsquerda + (50 * moduloW) + (42 * moduloW) / 2;
+
+            svgHtml += `<g id="textGroup" font-family="Arial, sans-serif" font-size="${hriFontSize}" font-weight="bold" fill="black" text-anchor="middle">`;
+            svgHtml += `<text x="${offsetEsquerda - (moduloW * 3.5)}" y="${yPosText}">${isbn[0]}</text>`;
+            svgHtml += `<text x="${xGrupo1}" y="${yPosText}" textLength="${42 * moduloW * 0.95}" lengthAdjust="spacing">${isbn.substring(1,7)}</text>`;
+            svgHtml += `<text x="${xGrupo2}" y="${yPosText}" textLength="${42 * moduloW * 0.95}" lengthAdjust="spacing">${isbn.substring(7,13)}</text>`;
+            svgHtml += `</g>`;
+
+            svg.innerHTML = svgHtml;
+            labelContainer.classList.remove("hidden");
+        });
+
+        btnDownloadSVG.addEventListener("click", () => {
+            const w = parseInt(widthInput.value); const h = parseInt(heightInput.value);
+            let mestreSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
+            mestreSvg += `<rect x="1" y="1" width="${w-2}" height="${h-2}" rx="24" fill="white" stroke="black" stroke-width="2" />`;
+            const fontSizeTop = h < 300 ? h * 0.08 : 32; const marginTop = h < 300 ? 2 : 4;
+            mestreSvg += `<text x="${w/2}" y="${fontSizeTop + marginTop + 4}" font-family="Arial, sans-serif" font-size="${fontSizeTop}" font-weight="bold" text-anchor="middle" fill="black">${textTop.textContent}</text>`;
+            let paddingLeft = logoBase64 ? 56 : 8;
+            if (logoBase64) {
+                const logoH = h * 0.55; const logoW = 45; const logoX = 16; const logoY = (h / 2) - (logoH / 2);
+                const centerX = logoX + (logoW / 2); const centerY = logoY + (logoH / 2);
+                mestreSvg += `<g transform="rotate(-90 ${centerX} ${centerY})"><image href="${logoBase64}" x="${logoX}" y="${logoY}" width="${logoW}" height="${logoH}" preserveAspectRatio="xMidYMidMeet" /></g>`;
+            }
+            const subSvgW = w - paddingLeft - 24; const subSvgH = h - fontSizeTop - 40; const subSvgY = fontSizeTop + 16; const subSvgX = paddingLeft + 4;
+            mestreSvg += `<svg x="${subSvgX}" y="${subSvgY}" width="${subSvgW}" height="${subSvgH}" viewBox="0 0 ${subSvgW} ${subSvgH}">${svg.innerHTML}</svg></svg>`;
+            
+            const blob = new Blob([mestreSvg], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `etiqueta-${input.value.replace(/[-\s]/g, '')}.svg`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+        });
+
+        btnDownloadPNG.addEventListener("click", () => {
+            const w = parseInt(widthInput.value); const h = parseInt(heightInput.value); const paddingLeft = logoBase64 ? 56 : 8;
+            const canvas = document.createElement("canvas"); const escalaDPI = 3; canvas.width = w * escalaDPI; canvas.height = h * escalaDPI;
+            const ctx = canvas.getContext("2d"); ctx.scale(escalaDPI, escalaDPI);
+            ctx.fillStyle = "#FFFFFF"; ctx.strokeStyle = "#000000"; ctx.lineWidth = 2;
+            const raio = 24; ctx.beginPath(); ctx.moveTo(1 + raio, 1); ctx.lineTo(w - 1 - raio, 1); ctx.quadraticCurveTo(w - 1, 1, w - 1, 1 + raio); ctx.lineTo(w - 1, h - 1 - raio); ctx.quadraticCurveTo(w - 1, h - 1, w - 1 - raio, h - 1); ctx.lineTo(1 + raio, h - 1); ctx.quadraticCurveTo(1, h - 1, 1, h - 1 - raio); ctx.lineTo(1, 1 + raio); ctx.quadraticCurveTo(1, 1, 1 + raio, 1); ctx.closePath(); ctx.fill(); ctx.stroke();
+            const fontSizeTop = h < 300 ? h * 0.08 : 32; const marginTop = h < 300 ? 2 : 4;
+            ctx.fillStyle = "#000000"; ctx.font = `bold ${fontSizeTop}px Arial, sans-serif`; ctx.textAlign = "center"; ctx.fillText(textTop.textContent, w / 2, fontSizeTop + marginTop + 4);
+            
+            const renderizarMiopolo = () => {
+                const subSvgW = w - paddingLeft - 24; const subSvgH = h - fontSizeTop - 40; const subSvgY = fontSizeTop + 16; const subSvgX = paddingLeft + 4;
+                const svgString = new XMLSerializer().serializeToString(svg);
+                const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" }); const urlBarcode = URL.createObjectURL(svgBlob); const imgBarcode = new Image();
+                imgBarcode.onload = () => {
+                    ctx.drawImage(imgBarcode, subSvgX, subSvgY, subSvgW, subSvgH);
+                    const pngUrl = canvas.toDataURL("image/png"); const link = document.createElement("a"); link.href = pngUrl; link.download = `etiqueta-${input.value.replace(/[-\s]/g, '')}.png`;
+                    document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(urlBarcode);
+                };
+                imgBarcode.src = urlBarcode;
+            };
+            if (logoBase64) {
+                const logoH = h * 0.55; const logoW = 45; const logoX = 16; const logoY = (h / 2) - (logoH / 2); const imgLogo = new Image();
+                imgLogo.onload = () => {
+                    ctx.save(); const centerX = logoX + (logoW / 2); const centerY = logoY + (logoH / 2); ctx.translate(centerX, centerY); ctx.rotate(-90 * Math.PI / 180); ctx.translate(-centerX, -centerY); ctx.drawImage(imgLogo, logoX, logoY, logoW, logoH); ctx.restore(); renderizarMiopolo();
+                };
+                imgLogo.src = logoBase64;
+            } else { renderizarMiopolo(); }
+        });
+
+        document.addEventListener("click", (e) => {
+            const btnInjetar = e.target.closest(".btn-injetar");
+            if (btnInjetar) {
+                const isbnObra = btnInjetar.getAttribute("data-isbn");
+                const urlObra = btnInjetar.getAttribute("data-url");
+                if (isbnObra) {
+                    input.value = isbnObra;
+                    input.classList.remove("border-rose-500", "bg-rose-950/30");
+                    errorMsg.classList.add("hidden");
+                    errorMsg.style.display = "none";
+                    btnGerar.click();
+                    input.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+                if (urlObra) {
+                    window.open(urlObra, "_blank");
+                }
+            }
+        });
+
+        btnGerar.click();
+        renderizarVitrine();
+    });
+</script>
+</body>
+</html>
