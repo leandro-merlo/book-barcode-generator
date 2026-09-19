@@ -100,19 +100,19 @@
             </div>
 
             <button id="btnGerar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg cursor-pointer text-sm tracking-wide transition-colors">
-                GERAR ETIQUETA REAL CBL
+                GERAR ETIQUETA ISBN
             </button>
         </div>
 
         <div id="labelPreviewContainer" class="hidden mt-8 pt-6 border-t border-slate-800 flex flex-col items-center justify-center relative">
             
-            <div id="cblLabel" class="bg-white text-black p-3 rounded-[24px] border-2 border-black shadow-inner flex flex-col items-center select-none relative box-border font-sans overflow-hidden">
+            <div id="isbnLabel" class="bg-white text-black p-3 rounded-[24px] border-2 border-black shadow-inner flex flex-col items-center select-none relative box-border font-sans overflow-hidden">
                 
-                <div id="cblTextTop" class="text-[32px] font-bold tracking-normal mt-1 text-center w-full whitespace-nowrap overflow-hidden select-none" style="font-family: Arial, sans-serif;">
+                <div id="isbnTextTop" class="text-[32px] font-bold tracking-normal mt-1 text-center w-full whitespace-nowrap overflow-hidden select-none" style="font-family: Arial, sans-serif;">
                     ISBN:
                 </div>
 
-                <div id="cblBodyCentral" class="w-full flex-1 min-h-0 mt-2 px-1 relative">
+                <div id="isbnBodyCentral" class="w-full flex-1 min-h-0 mt-2 px-1 relative">
                     <svg id="customBarcodeSvg" class="w-full h-full"></svg>
                 </div>
 
@@ -148,12 +148,12 @@
         const btnGerar = document.getElementById("btnGerar");
         const errorMsg = document.getElementById("errorMessage");
         const labelContainer = document.getElementById("labelPreviewContainer");
-        const textTop = document.getElementById("cblTextTop");
+        const textTop = document.getElementById("isbnTextTop");
         const svg = document.getElementById("customBarcodeSvg");
-        const bdyCentral = document.getElementById("cblBodyCentral");
+        const bdyCentral = document.getElementById("isbnBodyCentral");
         const logoContainer = document.getElementById("logoContainer");
         const customLogoPreview = document.getElementById("customLogoPreview");
-        const labelDiv = document.getElementById("cblLabel");
+        const labelDiv = document.getElementById("isbnLabel");
         const widthInput = document.getElementById("widthInput");
         const heightInput = document.getElementById("heightInput");
         const widthVal = document.getElementById("widthVal");
